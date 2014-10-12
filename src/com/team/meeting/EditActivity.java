@@ -13,6 +13,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.team.server.Get;
 import com.team.server.Post;
@@ -34,6 +35,7 @@ public class EditActivity extends Activity {
     private LinearLayout mParticipantLayout;
     private LinearLayout mResultLayout;
     private String mUser;
+    private TextView mKeywordText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +58,10 @@ public class EditActivity extends Activity {
         mProcessed = getIntent().getStringExtra("processed");
         mMessageContent = (EditText) findViewById(R.id.meeting_content_edittext);
         Button button = (Button) findViewById(R.id.share_button);
+        Button emailShareButton = (Button) findViewById(R.id.edit_button);
         mParticipantLayout = (LinearLayout) findViewById(R.id.participant_layout);
         mResultLayout = (LinearLayout) findViewById(R.id.results_layout);
+        mKeywordText = (TextView) findViewById(R.id.keyword_text);
         if (mIsOwner) {
             mResultLayout.setVisibility(View.VISIBLE);
             mParticipantLayout.setVisibility(View.GONE);
@@ -65,19 +69,42 @@ public class EditActivity extends Activity {
             mResultLayout.setVisibility(View.GONE);
             mParticipantLayout.setVisibility(View.VISIBLE);
         }
+        emailShareButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, mMessageContent.getText().toString());
+
+                startActivity(Intent.createChooser(sharingIntent, "Share Using"));
+
+            }
+        });
         button.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 JSONObject json = new JSONObject();
                 try {
+                    String content = mMessageContent.getText().toString();
+                    String correctedNotes = "";
+                    String split[] = content.split("\\.");
+                    for (String string : split) {
+                        Log.d(TAG, string);
+                        if (!isNumeric(string)) {
+                            Log.d(TAG, string);
+                            correctedNotes = addToSentence(string, correctedNotes, ":::");
+                        }
+
+                    }
+                    correctedNotes = correctedNotes.replace("\n", "").replace(",", "");
                     json.put(Constants.MID, mMeetingId);
-                    json.put(Constants.CORRECT_NOTES, mMessageContent.getText().toString());
+                    json.put(Constants.CORRECT_NOTES, correctedNotes);
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
+                Log.d(TAG, "json" + json.toString());
                 String params[] = new String[2];
                 params[0] = Constants.CORRECT_MEETING_MINUTES_URL;
                 params[1] = json.toString();
@@ -86,7 +113,9 @@ public class EditActivity extends Activity {
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 sharingIntent.setClassName("com.salesforce.chatter",
                         "com.salesforce.chatter.SendIntentHandler");
-                sharingIntent.putExtra(Intent.EXTRA_TEXT, mMessageContent.getText().toString());
+                sharingIntent.putExtra(Intent.EXTRA_TEXT, "Meeting Notes: " + "\n\n"
+                        + mMessageContent.getText().toString());
+                
                 startActivity(sharingIntent);
             }
         });
@@ -96,10 +125,22 @@ public class EditActivity extends Activity {
         sendText();
     }
 
+    public boolean isNumeric(String str)
+    {
+        try
+        {
+            Integer d = Integer.parseInt(str);
+        } catch (NumberFormatException nfe)
+        {
+            return false;
+        }
+        return true;
+    }
+
     private String postProcess(String stringExtra) {
         String split[] = stringExtra.split(":::");
         int i = 1;
-        String sentence = "Meeting Notes : " + "\n" + "\n";
+        String sentence = "";
         for (String string : split) {
             if (string != null && string.length() > 0 && !string.equals(" ")) {
                 sentence = addToSentence(i + ". " + string, sentence, "\n");
@@ -193,8 +234,7 @@ public class EditActivity extends Activity {
                     String learned = json.getString(Constants.LEARNED_MINUTES);
                     String token = json.getString("token");
                     String output = postProcess(learned + " ,");
-                    output = output + "\n" + "\n" + "Keywords: " + "\n";
-                    output = output + token;
+                    mKeywordText.setText("Keywords : " + "\n" + token);
                     mMessageContent.setText(output);
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
