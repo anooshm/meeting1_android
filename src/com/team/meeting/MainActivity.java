@@ -1,6 +1,7 @@
 
 package com.team.meeting;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,10 +13,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -31,24 +34,37 @@ public class MainActivity extends Activity {
     private Messenger mServiceMessenger;
     private Context activityContext;
     private String mString = "";
+    private WakeLock mWakeLock;
+    private String mMeetingId;
+    private boolean mIsOwner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        final ActionBar actionBar = getActionBar();
+        actionBar.setCustomView(R.layout.actionbar);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setDisplayUseLogoEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(false);
+
         setContentView(R.layout.activity_main);
         mPrefs = (SharedPreferences) getSharedPreferences(Constants.PREFS, 0);
         mIsListening = mPrefs.getBoolean(Constants.LISTENING, false);
+        mIsOwner = mPrefs.getBoolean(Constants.IS_OWNER, false);
+        mMeetingId = mPrefs.getString("mid", null);
         mStartListeningButton = (Button) findViewById(R.id.start_processing);
         mStopListeningButton = (Button) findViewById(R.id.stop_processing);
+        if (mIsOwner) {
+            mStopListeningButton.setText("End");
+        }
+
         mResulsLayout = (LinearLayout) findViewById(R.id.results_layout);
         checkLayout();
 
         // start Service
         Log.d(TAG, "Service started from main activity");
-        /*
-         * Intent service = new Intent(this, SpeechService.class);
-         * startService(service);
-         */
 
         activityContext = this.getApplicationContext();
         Intent service = new Intent(activityContext, SpeechService.class);
@@ -57,6 +73,7 @@ public class MainActivity extends Activity {
         mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0
                 : Context.BIND_ABOVE_CLIENT;
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mStartListeningButton.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -133,6 +150,7 @@ public class MainActivity extends Activity {
             unbindService(mServiceConnection);
             mServiceMessenger = null;
         }
+        this.finish();
     }
 
     private final ServiceConnection mServiceConnection = new ServiceConnection()

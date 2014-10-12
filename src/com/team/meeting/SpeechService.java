@@ -32,7 +32,7 @@ public class SpeechService extends Service {
     protected volatile boolean mIsCountDownOn;
     private static String TAG = "SpeechService";
     SpeechCallback scb;
-    public static String mString="";
+    public static String mString = "";
     public static String mProcessedString = "";
     public static boolean mCancelledFromParent;
     private static Context mContext;
@@ -84,6 +84,8 @@ public class SpeechService extends Service {
                     mCancelledFromParent = false;
                     target.mSpeechRecognizer.startListening(target.mSpeechRecognizerIntent);
                     target.mIsListening = true;
+                    mString = "";
+                    mProcessedString = "";
                     Log.d(TAG, "message start listening"); //$NON-NLS-1$
 
                     break;
@@ -113,8 +115,11 @@ public class SpeechService extends Service {
                     Log.d(TAG, "message canceled recognizer override"); //$NON-NLS-1$
                     Intent intent = new Intent(mContext, EditActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
                     intent.putExtra("original", mString);
                     intent.putExtra("processed", mProcessedString);
+                    mString = "";
+                    mProcessedString = "";
                     mContext.startActivity(intent);
                     break;
             }
@@ -240,8 +245,8 @@ public class SpeechService extends Service {
                     str = str + "," + data.get(i);
                 }
             }
-            mString = mString + ":" + str;
-            mProcessedString = mProcessedString + ":" + data.get(0);
+            mString = mString + ":::" + str;
+            mProcessedString = mProcessedString + ":::" + data.get(0);
             Log.d(TAG, "onResults -" + str);
             Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
             mIsListening = false;

@@ -1,6 +1,8 @@
 
 package com.team.server;
 
+import android.util.Log;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -46,9 +48,14 @@ public class ConnectionHelper {
             throws UnsupportedEncodingException, IOException, ClientProtocolException {
         DefaultHttpClient client = createHttpClient();
         HttpPost post = new HttpPost(url);
+        String jsonString = jsonData.toString();
+        jsonString = jsonString.replace("{", "").replace("}", "").replace("\"", "").replace(":", "=").replace(",", "&");
+        Log.d("replaced String", jsonString);
         StringEntity entity = new StringEntity(jsonData.toString());
-       // entity.setContentEncoding("UTF-8");
-        entity.setContentType("application/json");
+        // entity.setContentEncoding("UTF-8");
+        // entity.setContentType("application/json");
+        post.setHeader("Accept", "application/json");
+        post.addHeader("Content-Type", "application/x-www-form-urlencoded");
         post.setEntity(entity);
 
         HttpResponse response = client.execute(post);

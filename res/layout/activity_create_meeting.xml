@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -9,36 +10,56 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.team.meeting.CreateMeetingActivity" >
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="50dp"
+        android:text="Welcome to Meeting1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/blue"
+        android:textStyle="bold|italic" />
+
+    <Button
+        android:id="@+id/view_profile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/blue_button"
+        android:text="View Profile"
+        android:textColor="@android:color/white" />
+
     <Button
         android:id="@+id/create_meeting_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:background="@android:color/black"
-        android:text="Create"
+        android:background="@drawable/blue_button"
+        android:text="Create a new Meeting"
         android:textColor="@android:color/white" />
 
     <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="20dp"
+        android:text="( Or )" />
+
+    <EditText
         android:id="@+id/create_meeting_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@android:color/darker_gray"
-        android:text="Create"
-        android:visibility="gone"
-        android:textColor="@android:color/white" />
+        android:hint="Enter a meeting id" />
 
     <Button
         android:id="@+id/next_button"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:background="@android:color/black"
+        android:background="@drawable/blue_button"
         android:text="Next"
-        android:visibility="gone"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        android:visibility="visible" />
 
 </LinearLayout>
